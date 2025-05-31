@@ -44,7 +44,7 @@ class Login(Resource):
     @auth_ns.response(200, 'Login bem-sucedido.')
     @auth_ns.response(401, 'Usuário ou senha inválidos.')
     def post(self):
-        """Realiza login e inicia sessão"""
+        """Realiza login e inicia sessaumm""" #mudar aqui
         data = auth_ns.payload
         user = User.query.filter_by(username=data['username']).first()
         if not user or not check_password_hash(user.password_hash, data['password']):
