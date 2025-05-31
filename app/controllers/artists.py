@@ -62,7 +62,7 @@ class ArtistResource(Resource):
         db.session.commit()
         return artist
 
-    def delete(self, id):  # noqa: E501
+    def delete(self, id):
         """Exclui um artista"""
         artist = Artist.query.get(id)
         if not artist:
