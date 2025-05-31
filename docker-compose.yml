@@ -1,0 +1,36 @@
+# C:\Users\ianes\Desktop\AS-Cloud\docker-compose.yml
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: galeria_db
+    environment:
+      MYSQL_DATABASE: galeria
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: minecraft2013!
+      MYSQL_ROOT_PASSWORD: minecraft2013!
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h localhost -pminecraft2013!']
+      interval: 10s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: galeria_app
+    env_file:
+      - .env.local    # para dev local, aponta p/ db docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/usr/src/app
+    restart: always
+
+volumes:
+  db_data:
