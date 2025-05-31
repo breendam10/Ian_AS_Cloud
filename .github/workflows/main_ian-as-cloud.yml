@@ -1,0 +1,51 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy container app to Azure Web App - ian-as-cloud
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to registry
+      uses: docker/login-action@v2
+      with:
+        registry: https://projetocloud.azurecr.io/
+        username: ${{ secrets.AzureAppService_ContainerUsername_c5b3e7976f114bc595fa8aa28d103b5e }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_68517bcf06cd45109a77d6283c4ed227 }}
+
+    - name: Build and push container image to registry
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        tags: projetocloud.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_c5b3e7976f114bc595fa8aa28d103b5e }}/ian_as_cloud-app:${{ github.sha }}
+        file: ./Dockerfile
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'ian-as-cloud'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_f46db790b1134a379f453a2167d5c7c0 }}
+        images: 'projetocloud.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_c5b3e7976f114bc595fa8aa28d103b5e }}/ian_as_cloud-app:${{ github.sha }}'
